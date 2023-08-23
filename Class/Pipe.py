@@ -2,7 +2,7 @@ import pygame
 import random
 import sys
 
-SIZE_BETWEEN_PIPES = 125
+SIZE_BETWEEN_PIPES = 100
 MINIMUM_HEIGHT = 50
 SPEED = 140
 
@@ -11,7 +11,9 @@ class Pipe:
     def __init__(self, spawn_x, screen_height, asset):
         self.x = spawn_x
         self.speed = SPEED
-        self.up = random.randint(MINIMUM_HEIGHT, screen_height - SIZE_BETWEEN_PIPES)
+        self.up = random.randint(
+            MINIMUM_HEIGHT, screen_height - SIZE_BETWEEN_PIPES - MINIMUM_HEIGHT
+        )
         self.down = self.up + SIZE_BETWEEN_PIPES
         self.asset = asset
         self.screen_height = screen_height

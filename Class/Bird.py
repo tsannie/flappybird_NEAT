@@ -16,7 +16,6 @@ class Bird:
         self.y = spawn_y
         self.gravity = GRAVITY
         self.velocity = 0
-        self.score = 0
         self.alive = True
         self.image_index = 0
         self.image = ASSETS

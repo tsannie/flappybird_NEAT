@@ -12,10 +12,11 @@ class PipeManager:
         self.width = width
         self.height = height
         self.spawn_timer = 0
+        self.score = 0
 
-    def update(self, dt, bird):
+    def update(self, dt, bird, ge):
         self.spawn_timer += dt
-        if self.spawn_timer >= SPAWN_DELAY:
+        if self.spawn_timer >= SPAWN_DELAY or len(self.pipes) == 0:
             self.spawn_timer = 0
             self.pipes.append(Pipe(self.width, self.height, ASSET))
 
@@ -28,7 +29,9 @@ class PipeManager:
 
         for pipe in self.pipes:
             if pipe.check_passed(bird.x):
-                bird.score += 1
+                self.score += 1
+                for g in ge:
+                    g.fitness += 5
                 break
 
     def draw(self, screen):
@@ -39,3 +42,14 @@ class PipeManager:
         for pipe in self.pipes:
             if pipe.collides(bird.get_rect()):
                 bird.alive = False
+                return True
+        return False
+
+    def getNextPipe(self, bird):
+        for pipe in self.pipes:
+            if pipe.x + ASSET.get_width() > bird.x:
+                return pipe
+        raise Exception("No next pipe found")
+
+    def getScore(self):
+        return self.score
