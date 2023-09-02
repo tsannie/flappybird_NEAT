@@ -9,6 +9,8 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
 PATH_NEAT_CONFIG = "neat_config"
+generation = 0
+best_score = 0
 
 
 def draw_score(screen, score):
@@ -32,8 +34,13 @@ def run(genomes, config):
         genome.fitness = 0
         ge.append(genome)
 
+    global generation
+    generation += 1
+
     pygame.init()
     pygame.display.set_caption("Flappy Bird")
+    font = pygame.font.SysFont("Arial", 20)
+
     screen = pygame.display.set_mode(
         (WINDOW_WIDTH, WINDOW_HEIGHT),
     )
@@ -52,7 +59,7 @@ def run(genomes, config):
         # check collision
         for i, bird in enumerate(birds):
             if pipes.collision(bird):
-                ge[i].fitness -= 1
+                ge[i].fitness -= 10
                 nets.pop(i)
                 ge.pop(i)
                 birds.pop(i)
@@ -72,21 +79,36 @@ def run(genomes, config):
 
         draw_score(screen, pipes.getScore())
 
+        # update population
+        population = len(birds)
+
+        # draw generation
+        text_pop = font.render(f"Population: {population}", True, (255, 255, 255))
+        text_gen = font.render(f"Generation: {generation}", True, (255, 255, 255))
+
+        # print on top left
+        screen.blit(text_pop, (10, 10))
+        screen.blit(text_gen, (10, 40))
+
+        # best score
+        global best_score
+        best_score = max(best_score, pipes.getScore())
+        text_best = font.render(f"Best score: {best_score}", True, (255, 255, 255))
+
+        # print on top right
+        screen.blit(text_best, (WINDOW_WIDTH - text_best.get_width() - 10, 10))
+
         # jump
         next_pipe = pipes.getNextPipe(birds[0])
         for i, bird in enumerate(birds):
             ge[i].fitness += 0.1
 
-            # punition if bird is too high or too low
-            if bird.y < 0 or bird.y > WINDOW_HEIGHT:
-                ge[i].fitness -= 0.5
+            # bonus zone
+            if bird.y < next_pipe.up + 5 and bird.y > next_pipe.down - 5:
+                ge[i].fitness += 0.2
 
             output = nets[i].activate(
-                (
-                    bird.y,
-                    abs(bird.y - next_pipe.up),
-                    abs(bird.y - next_pipe.down),
-                )
+                (bird.y, abs(bird.y - next_pipe.up), abs(bird.y - next_pipe.down))
             )
 
             if output[0] > 0.5:
@@ -115,7 +137,7 @@ def init_neat(config_path):
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
 
-    winner = population.run(run, 50)
+    winner = population.run(run)
 
 
 if __name__ == "__main__":

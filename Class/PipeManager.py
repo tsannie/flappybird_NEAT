@@ -31,7 +31,7 @@ class PipeManager:
             if pipe.check_passed(bird.x):
                 self.score += 1
                 for g in ge:
-                    g.fitness += 5
+                    g.fitness += 10
                 break
 
     def draw(self, screen):
